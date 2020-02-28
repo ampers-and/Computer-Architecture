@@ -36,11 +36,11 @@ class CPU:
             71: self.prn,
             1: self.hlt,
             162: self.mul,
-            160: self.add,
-            69: self.push,
-            70: self.pop,
-            80: self.call,
-            17: self.ret,
+            # 160: self.add,
+            # 69: self.push,
+            # 70: self.pop,
+            # 80: self.call,
+            # 17: self.ret,
 
         }
 
@@ -54,30 +54,47 @@ class CPU:
         self.running = False
         self.pc += 1
 
-    def ldi(self, op_a, op_b):
-        self.reg[op_a] = op_b
+    def ldi(self, reg_a, reg_b):
+        self.reg[reg_a] = reg_b
         self.pc += 3
 
-    def prn(self, op_a, op_b):
-        print("REG", self.reg[op_a])
+    def prn(self, reg_a, reg_b):
+        print(self.reg[reg_a])
         self.pc += 2
+
+    def mul(self, reg_a, reg_b):
+        self.alu("MUL", reg_a, reg_b)
+        self.pc += 3
+
 
     def load(self):
         """Load a program into memory."""
+
 
         address = 0
 
         # For now, we've just hardcoded a program:
 
         program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
+            # # From print8.ls8
+            # 0b10000010, # LDI R0,8
+            # 0b00000000,
+            # 0b00001000,
+            # 0b01000111, # PRN R0
+            # 0b00000000,
+            # 0b00000001, # HLT
         ]
+
+        file = sys.argv[1]
+
+        with open(file) as f:
+                for line in f:
+                    text = line.split('#')
+                    num = text[0].strip()
+                    if num != '':
+                        program.append(int(num, 2))
+
+
 
         for instruction in program:
             self.ram[address] = instruction
@@ -90,6 +107,10 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
+
+        #mul
+        if op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -122,10 +143,10 @@ class CPU:
             operand_b = self.ram_read(self.pc + 2)
             # print('ir', ir)
             if ir in self.instructions:
-                if ir == 80 or ir == 17:
+                if ir == 80 or ir == 17 or ir == 1:
                     self.instructions[ir]()
                 else:
-                    self.istructions[ir](operand_a, operand_b)
+                    self.instructions[ir](operand_a, operand_b)
                     #self.pc move handled in specific instructions
 
             else:

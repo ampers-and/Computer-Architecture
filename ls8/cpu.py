@@ -7,7 +7,60 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.reg = [0] * 8
+        self.ram = [0] * 256
+        self.pc = 0
+        self.running = True
+
+        # # Load Immediate - 130
+        # LDI = 0b10000010 
+        # # Print - 71
+        # PRN = 0b01000111 
+        # # Multiply - 162
+        # MUL = 0b10100010
+        # # Add - 160
+        # ADD = 0b10100000
+        # # Push - 69
+        # PUSH = 0b01000101
+        # # Pop - 70
+        # POP = 0b01000110
+        # # Call - 80
+        # CALL = 0b01010000
+        # # Return - 17
+        # RET = 0b00010001
+        # # Halt - 1
+        # HLT = 0b00000001
+
+        self.instructions = {
+            130: self.ldi,
+            71: self.prn,
+            1: self.hlt,
+            162: self.mul,
+            160: self.add,
+            69: self.push,
+            70: self.pop,
+            80: self.call,
+            17: self.ret,
+
+        }
+
+    def ram_read(self, MAR):
+      return self.ram[MAR]
+    
+    def ram_write(self, MDR, MAR):
+      self.ram[MAR] = MDR
+
+    def hlt(self):
+        self.running = False
+        self.pc += 1
+
+    def ldi(self, op_a, op_b):
+        self.reg[op_a] = op_b
+        self.pc += 3
+
+    def prn(self, op_a, op_b):
+        print("REG", self.reg[op_a])
+        self.pc += 2
 
     def load(self):
         """Load a program into memory."""
@@ -62,4 +115,19 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+
+        while self.running:
+            ir = self.ram_read(self.pc)
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
+            # print('ir', ir)
+            if ir in self.instructions:
+                if ir == 80 or ir == 17:
+                    self.instructions[ir]()
+                else:
+                    self.istructions[ir](operand_a, operand_b)
+                    #self.pc move handled in specific instructions
+
+            else:
+                print(f"Unknown instruction at index {self.pc}")
+                sys.exit(1)

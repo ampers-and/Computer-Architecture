@@ -42,8 +42,8 @@ class CPU:
             160: self.add,
             69: self.push,
             70: self.pop,
-            # 80: self.call,
-            # 17: self.ret,
+            80: self.call,
+            17: self.ret,
 
         }
 
@@ -88,6 +88,19 @@ class CPU:
         self.sp += 1
         self.pc += 2
 
+    def call(self):
+        value = self.pc + 2
+        self.sp -= 1
+        self.ram_write(self.sp, value)
+
+        reg = self.ram_read(self.pc + 1)
+        subroutine_address = self.reg[reg]
+        self.pc = subroutine_address
+
+    def ret(self):
+        self.pc = self.ram_read(self.sp)
+        self.sp += 1
+
     def load(self):
         """Load a program into memory."""
 
@@ -130,7 +143,7 @@ class CPU:
         #elif op == "SUB": etc
 
         #mul
-        if op == "MUL":
+        elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
